@@ -2,7 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const app = express()
-const port = process.nev.PORT || 5000
+const port = 5000
 
 // Static Files
 app.use(express.static('public'))
