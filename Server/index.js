@@ -1,41 +1,38 @@
 const express = require('express')
 const app = express()
+const mysql = require('mysql')
 
 app.get("/", (req, res) => {
     res.send("Saludos");
 })
 
+
+const db = mysql.createConnection({
+  user: "root",
+  host: "localhost",
+  password: "",
+  database: "ITCORP",
+});
+
 app.listen(3001, () => {
-    console.log('running on port 3001');
+  db.connect(function(err){
+      if (err) throw err;
+      console.log("Connected!");
+    });
+  console.log("Funcionando en puerto 3001");
 });
 
-const { Connection, Request } = require("tedious");
 
-// Create connection to database
-const config = {
-  authentication: {
-    options: {
-      userName: "FinanchDB", // update me
-      password: "saludos-123" // update me
-    },
-    type: "default"
-  },
-  server: "itcorp.database.windows.net", // update me
-  options: {
-    database: "Financh", //update me
-    encrypt: true
-  }
-};
+app.get('/datos', (req, res) => {
 
-const connection = new Connection(config);
+  db.query(
+    "SELECT * FROM Usuario",
+    (err, result) => {
+          if (err) {
+              res.send({err:err})
+          }
+          res.send(result);
 
-// Attempt to connect and execute queries if connection goes through
-connection.on("connect", err => {
-  if (err) {
-    console.error(err.message);
-  } else {
-    console.log("conexion!");
-  }
+      }
+  );
 });
-
-connection.connect();
