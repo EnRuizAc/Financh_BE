@@ -1,6 +1,10 @@
-const express = require('express')
-const app = express()
-const mysql = require('mysql')
+const express = require('express');
+const app = express();
+const mysql = require('mysql');
+const cors = require('cors');
+
+app.use(cors());
+app.use(express.json());
 
 app.get("/", (req, res) => {
     res.send("Saludos");
@@ -11,7 +15,7 @@ const db = mysql.createConnection({
   user: "root",
   host: "localhost",
   password: "",
-  database: "ITCORP",
+  database: "pruebarq",
 });
 
 app.listen(3001, () => {
@@ -21,6 +25,7 @@ app.listen(3001, () => {
     });
   console.log("Funcionando en puerto 3001");
 });
+
 
 
 app.get('/datos', (req, res) => {
@@ -33,6 +38,37 @@ app.get('/datos', (req, res) => {
           }
           res.send(result);
 
+      }
+  );
+});
+
+
+app.post('/prueba', (req, res) => {
+
+  const nombre = req.body.nombre;
+  const contrasena = req.body.contrasena;
+
+  db.query(
+    "INSERT INTO usuario (nombre, contrasena) VALUES (?,?)", [nombre, contrasena],
+    (err, result) => {
+          if (err) {
+              console.log(err)
+          } else {
+            res.send("you")
+          }
+      }
+  );
+});
+
+app.get('/usuarios', (req, res) => {
+  db.query(
+    "SELECT * FROM usuario" ,
+    (err, result) => {
+          if (err) {
+              console.log(err);
+          } else {
+            res.send(result);
+          }
       }
   );
 });
