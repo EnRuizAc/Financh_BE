@@ -1,11 +1,14 @@
 const express = require('express')
 const app = express()
 const mysql = require('mysql')
+const cors = require('cors');
 
 app.get("/", (req, res) => {
     res.send("Saludos");
 })
 
+app.use(express.json());
+app.use(cors());
 
 const db = mysql.createConnection({
   user: "root",
@@ -13,6 +16,29 @@ const db = mysql.createConnection({
   password: "",
   database: "ITCORP",
 });
+
+
+app.post("/registro", (req, res) => {
+  const usuario = req.body.usuario;
+  const contrasena = req.body.contrasena;
+  const rol = req.body.rol;
+
+  bcrypt.hash(contrasena, saltRounds, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+
+    db.query(
+      "INSERT INTO users (usuario, contrasena, rol) VALUES (?,?,?)",
+      [usuario, contrasena, rol],
+      (err, result) => {
+        console.log(err);
+      }
+    );
+  });
+});
+
+//----------------------------
 
 app.listen(3001, () => {
   db.connect(function(err){
