@@ -99,15 +99,12 @@ function uploadXlsx(req, res) {
   var data = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
 
   // Variables para manejo e inserción
-  console.log("Data Completa recién asignada");
+  // console.log("Data Completa recién asignada");
   // console.log(data);
-  console.log("Tamaño");
-  console.log(data.length);
+  // console.log("Tamaño");
+  // console.log(data.length);
 
-
-
-
-  //Se define el tamaño de todo
+  //Se define el tamaño de todo según los contenidos
   const size = data.length;
 
   // Cuentas tendrá data en formato que pueda ser interpretado para insertar en la base de datos mediante las llaves
@@ -119,24 +116,23 @@ function uploadXlsx(req, res) {
     data[i] = Object.values(data[i]);
   }
   
-
-  console.log("Cuentas");
+  // console.log("Cuentas");
   // console.log(cuentas);
-  console.log("Data");
+  // console.log("Data");
   // console.log(data);
 
-  
 
-  // Insertar en base de datos
-
+  // Inserción en base de datos. Es necesario solo almacenar las cuentas, no toda la información (encabezado y pie)
   // Variable para indice de cuentas
   var k = 0;
-  // while (cuentas.length < 2)
+
+  //Ciclo para almacenar los valores en cuentas, al mismo tiempo que se insertan en la base de datos
   for (var i = 0; i < size; i++)
   {
+    //Se comprueba que el primer elemento sea un número, verificación de que el dato sea un nivel de cuenta
     if (typeof(data[i][0]) == typeof(13))
     {
-      //Se llena de elementos vacíos acorde al tamaño
+      //Se llena de elementos vacíos acorde al tamaño, iterativamente
       cuentas.push(
         {
           "Nivel": "",
@@ -147,12 +143,12 @@ function uploadXlsx(req, res) {
         }
       );
 
-      // Se asignan las variables a cuentas
-      console.log(k);
+      // Se asignan los valores de data (que ya estamos seguros que es una cuenta) a cuentas
       cuentas[k].Nivel = data[i][0];
       cuentas[k].Codigo = data[i][1];
       cuentas[k].Nombre = data[i][2];
       cuentas[k].Tipo = data[i][3];
+      //Pequeña verificación y conversión de string a bool
       if (data[k][4] == "Afectable")
       {
         cuentas[k].Afectable = true;
@@ -160,6 +156,7 @@ function uploadXlsx(req, res) {
         cuentas[k].Afectable = false;
       }
 
+      //Inserción en la base de datos de los respectivos atributos
       db.query(
         "INSERT INTO Cuenta (Nivel, Codigo, Nombre, Tipo, Es_Afectable) VALUES (?, ?, ?, ?, ?)", [cuentas[k].Nivel, cuentas[k].Codigo, cuentas[k].Nombre, cuentas[k].Tipo, cuentas[k].Afectable],
         (err, result) => {
@@ -171,21 +168,18 @@ function uploadXlsx(req, res) {
               // }
           }
       );
+      //Aumento del índice que tendra cuentas, debido al desface que existe debido al encabezado
       k++;
-    
-    
-    
-    } else {
-      console.log("No entro");
-    }
-    
+  }
+
+  //Verificación final de los valores que contiene cuentas después del ciclo
 
   }
   console.log("Cuentas después ciclo");
-  console.log(cuentas);
+  // console.log(cuentas);
 
-    return res.status(201).send(cuentas);
-}
+return res.status(201).send(cuentas);
+};
 
 
 app.get('/datosCuentas', (req, res) => {
