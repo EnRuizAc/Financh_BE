@@ -47,48 +47,6 @@ app.post("/registro", (req, res) => {
   });
 });
 
-//----------------------------
-/*
-// Multer Upload Storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-  cb(null, __basedir + '/uploads/')
-  },
-  filename: (req, file, cb) => {
-  cb(null, file.fieldname + "-" + Date.now() + "-" + file.originalname)
-  }
-  });
-
-  const upload = multer({storage: storage});
-
-//! Routes start
-//route for Home page
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-// -> Express Upload RestAPIs
-app.post('/uploadfile', upload.single("uploadfile"), (req, res) =>{
-  importExcelData2MySQL(__basedir + '/uploads/' + req.file.filename);
-  console.log(res);
-});
-// -> Import Excel Data to MySQL database
-function importExcelData2MySQL(filePath){
-// File path.
-readXlsxFile(filePath).then((rows) => {
-// `rows` is an array of rows
-// each row being an array of cells.  
-  console.log(rows);
-
-/**
-[ [ 'nivel', 'codigo', 'nombre', 'tipo' ],
-[ 1, '000-0100', 'activo', 'A Activo Deudora' ],
-[ 2, '000-0110', 'circulante', 'A Activo Deudora' ],
-[ 3, '100-000', 'Fondo Fijo Caja', 'A Activo Deudora' ]
-*/
-
-//----------------------------
-
-
 
 app.get('/datos', (req, res) => {
 
