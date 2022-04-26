@@ -99,75 +99,92 @@ function uploadXlsx(req, res) {
   var data = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
 
   // Variables para manejo e inserción
-  console.log("Data en 0");
-  console.log(data);
-  console.log("Length");
+  console.log("Data Completa recién asignada");
+  // console.log(data);
+  console.log("Tamaño");
   console.log(data.length);
-  // console.log(data[0].Nivel);
-  // console.log(data[0]["  C ó d i g o"]);
-  // console.log(data[0]["N o m b r e"]);
-  // console.log(data[0]["T i p o"]);
-  // console.log(data[0]["T i p o"]);
 
-  //Convertir cada línea horizontal en un objeto fijo para poder acceder al valor dado iterando
+
+
+
+  //Se define el tamaño de todo
   const size = data.length;
+
   // Cuentas tendrá data en formato que pueda ser interpretado para insertar en la base de datos mediante las llaves
   var cuentas = [];
+
+  //Convertir cada línea horizontal en un objeto fijo para poder acceder al valor dado iterando
   for (var i = 0; i < size; i++)
   {
     data[i] = Object.values(data[i]);
-
-    // Se llena de elementos vacíos acorde al tamaño
-    cuentas.push(
-      {
-        "Nivel": "",
-        "Codigo": "",
-        "Nombre": "",
-        "Tipo": "",
-        "Afectable": ""
-      }
-    );
   }
   
 
   console.log("Cuentas");
-  console.log(cuentas);
+  // console.log(cuentas);
+  console.log("Data");
+  // console.log(data);
+
   
+
   // Insertar en base de datos
+
+  // Variable para indice de cuentas
+  var k = 0;
+  // while (cuentas.length < 2)
   for (var i = 0; i < size; i++)
   {
-    console.log(i);
-    cuentas[i].Nivel = data[i][0];
-    cuentas[i].Codigo = data[i][1];
-    cuentas[i].Nombre = data[i][2];
-    cuentas[i].Tipo = data[i][3];
-    if (data[i][4] == "Afectable")
+    if (typeof(data[i][0]) == typeof(13))
     {
-      cuentas[i].Afectable = true;
-    } else {
-      cuentas[i].Afectable = false;
-    }
-
-
-
-
-    db.query(
-      "INSERT INTO Cuenta (Nivel, Codigo, Nombre, Tipo, Es_Afectable) VALUES (?, ?, ?, ?, ?)", [cuentas[i].Nivel, cuentas[i].Codigo, cuentas[i].Nombre, cuentas[i].Tipo, cuentas[i].Afectable],
-      (err, result) => {
-            if (err) {
-              console.log(err)
-            } 
-            // else {
-            //   res.send(result)
-            // }
+      //Se llena de elementos vacíos acorde al tamaño
+      cuentas.push(
+        {
+          "Nivel": "",
+          "Codigo": "",
+          "Nombre": "",
+          "Tipo": "",
+          "Afectable": ""
         }
-    );
+      );
+
+      // Se asignan las variables a cuentas
+      console.log(k);
+      cuentas[k].Nivel = data[i][0];
+      cuentas[k].Codigo = data[i][1];
+      cuentas[k].Nombre = data[i][2];
+      cuentas[k].Tipo = data[i][3];
+      if (data[k][4] == "Afectable")
+      {
+        cuentas[k].Afectable = true;
+      } else {
+        cuentas[k].Afectable = false;
+      }
+
+      db.query(
+        "INSERT INTO Cuenta (Nivel, Codigo, Nombre, Tipo, Es_Afectable) VALUES (?, ?, ?, ?, ?)", [cuentas[k].Nivel, cuentas[k].Codigo, cuentas[k].Nombre, cuentas[k].Tipo, cuentas[k].Afectable],
+        (err, result) => {
+              if (err) {
+                console.log(err)
+              } 
+              // else {
+              //   res.send(result)
+              // }
+          }
+      );
+      k++;
+    
+    
+    
+    } else {
+      console.log("No entro");
+    }
+    
+
   }
   console.log("Cuentas después ciclo");
   console.log(cuentas);
 
-
-    return res.status(201).send(data);
+    return res.status(201).send(cuentas);
 }
 
 
