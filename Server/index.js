@@ -213,7 +213,6 @@ function uploadMovimientos(req, res) {
     var sheet_name_list = workbook.SheetNames;
     var data = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
     var account = "";
-    var output = "";
     var count = 0;
     var movimientos = [];
     for (let line of data) {
@@ -223,8 +222,7 @@ function uploadMovimientos(req, res) {
             } else {
                 if (Object.keys(line).length >= 6 && line["CONTPAQ i"] !== "Fecha") {
 
-
-
+                  // Inserción del nuevo movimiento a llenar de información
                   movimientos.push(
                     {
                       "Cuenta": "",
@@ -238,18 +236,57 @@ function uploadMovimientos(req, res) {
                       "Saldo": ""
                     });
 
-
-        
                     // Cambios para intentar inserción
                     movimientos[count].Cuenta = account;
-                    movimientos[count].Fecha = line["CONTPAQ i"];
+                    movimientos[count].Fecha = new Date(line["CONTPAQ i"]).toLocaleDateString('en-ZA');
                     movimientos[count].Tipo = line["__EMPTY"];
                     movimientos[count].Numero = line["__EMPTY_1"];
                     movimientos[count].Concepto = line["Lecar Consultoria en TI, S.C."];
-                    movimientos[count].Referencia = line["__EMPTY_2"];
-                    movimientos[count].Cargo = line["__EMPTY_3"];
-                    movimientos[count].Abono = line["__EMPTY_4"];
+
+                    // Revisión de si referencia es indefinido para insertar string vacío en la base de datos
+                    if (typeof(line["__EMPTY_2"]) == typeof(""))
+                    {
+                      movimientos[count].Referencia = line["__EMPTY_2"];
+                    } else 
+                    {
+                      movimientos[count].Referencia = "";
+                    }
+
+                    // Revisión de si cargo o abono está vacío, para que el otro se almacene con un 0 y no como indefinido
+                    if (typeof(line["__EMPTY_3"]) == typeof(1))
+                    {
+                      movimientos[count].Cargo = line["__EMPTY_3"];
+                      movimientos[count].Abono = 0;
+
+                    } else if ((typeof(line["__EMPTY_4"]) == typeof(1)))
+                    {
+                      movimientos[count].Cargo = 0;
+                      movimientos[count].Abono = line["__EMPTY_4"];
+
+                    }
+                   
                     movimientos[count].Saldo = line["Hoja:      1"];
+
+                    // console.log("Tipo Fecha");
+                    // console.log(typeof(movimientos[count].Fecha))
+
+
+                    //Inserción en la base de datos de los respectivos atributos
+                    db.query(
+                      "INSERT INTO Movimiento (Fecha, Tipo, Numero, Concepto, Referencia, Cargo, Abono, Saldo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                       [movimientos[count].Fecha, movimientos[count].Tipo, movimientos[count].Numero, movimientos[count].Concepto, movimientos[count].Referencia,
+                        movimientos[count].Cargo, movimientos[count].Abono, movimientos[count].Saldo],
+                      (err, result) => {
+                            if (err) {
+                              console.log(err)
+                            } 
+                            // else {
+                            //   res.send(result)
+                            // }
+                        }
+                    );
+
+
 
 
                     count++;
@@ -259,7 +296,8 @@ function uploadMovimientos(req, res) {
     }
 
     console.log(movimientos);
-    // console.log(count);    
+    // console.log(count);
+    console.log(typeof(movimientos[0].Fecha));    
 
     return res.status(201).send(movimientos);
 }
