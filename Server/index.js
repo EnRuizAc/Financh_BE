@@ -82,6 +82,31 @@ app.get('/usuarios', (req, res) => {
   );
 });
 
+app.get('/datosCuentas', (req, res) => {
+
+  db.query(
+    "SELECT * FROM Cuenta",
+    (err, result) => {
+          if (err) {
+              res.send({err:err})
+          }
+          res.send(result);
+      }
+  );
+});
+
+app.get('/datosMovimientos', (req, res) => {
+
+  db.query(
+    "SELECT * FROM Movimiento",
+    (err, result) => {
+          if (err) {
+              res.send({err:err})
+          }
+          res.send(result);
+      }
+  );
+});
 
 
 var upload = multer({
@@ -182,16 +207,59 @@ return res.status(201).send(cuentas);
 };
 
 
-app.get('/datosCuentas', (req, res) => {
+app.post("/api/movimientos", upload.single('file'), uploadMovimientos);
+function uploadMovimientos(req, res) {    
+    var workbook = xlsx.read(req.file.buffer);
+    var sheet_name_list = workbook.SheetNames;
+    var data = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+    var account = "";
+    var output = "";
+    var count = 0;
+    var movimientos = [];
+    for (let line of data) {
+        if (Object.keys(line).length >= 4 && line["CONTPAQ i"] !== undefined && line["__EMPTY"] !== "") {
+            if (String(line["CONTPAQ i"]).match(/\d{3}-\d{3}/)) {
+                account = line["CONTPAQ i"];
+            } else {
+                if (Object.keys(line).length >= 6 && line["CONTPAQ i"] !== "Fecha") {
 
-  db.query(
-    "SELECT * FROM Cuenta",
-    (err, result) => {
-          if (err) {
-              res.send({err:err})
-          }
-          res.send(result);
 
-      }
-  );
-});
+
+                  movimientos.push(
+                    {
+                      "Cuenta": "",
+                      "Fecha": "",
+                      "Tipo": "",
+                      "Numero": "",
+                      "Concepto": "",
+                      "Referencia": "",
+                      "Cargo": "",
+                      "Abono": "",
+                      "Saldo": ""
+                    });
+
+
+        
+                    // Cambios para intentar inserción
+                    movimientos[count].Cuenta = account;
+                    movimientos[count].Fecha = line["CONTPAQ i"];
+                    movimientos[count].Tipo = line["__EMPTY"];
+                    movimientos[count].Numero = line["__EMPTY_1"];
+                    movimientos[count].Concepto = line["Lecar Consultoria en TI, S.C."];
+                    movimientos[count].Referencia = line["__EMPTY_2"];
+                    movimientos[count].Cargo = line["__EMPTY_3"];
+                    movimientos[count].Abono = line["__EMPTY_4"];
+                    movimientos[count].Saldo = line["Hoja:      1"];
+
+
+                    count++;
+                }
+            }
+        }
+    }
+
+    console.log(movimientos);
+    // console.log(count);    
+
+    return res.status(201).send(movimientos);
+}
