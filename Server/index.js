@@ -69,6 +69,31 @@ app.post('/prueba', (req, res) => {
   );
 });
 
+app.post('/crear-empresa', (req,res) =>{
+  console.log(req.body);
+    const Nombre = req.body.Nombre;
+
+    db.query(
+      "INSERT INTO empresa (Nombre) VALUE (?)",
+    [Nombre], (err, resutl) =>{
+        if(err){
+          console.log(err);
+        } else {
+          res.send("Funcionó");
+        }
+    });
+});
+
+app.get('/empresas', (req,res) =>{
+  db.query("SELECT * FROM empresa", (err, result) => {
+    if (err){
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
 app.get('/usuarios', (req, res) => {
   db.query(
     "SELECT * FROM usuario" ,
