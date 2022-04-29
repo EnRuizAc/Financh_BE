@@ -6,7 +6,7 @@ const multer = require("multer");
 const xlsx = require('xlsx');
 
 
-const app = express();
+const app = express(); 
 app.use(cors());
 app.use(express.json());
 
@@ -16,6 +16,8 @@ var storage = multer.memoryStorage();
 app.get("/", (req, res) => {
     res.send("Saludos");
 })
+
+app.use(express.json());
 
 
 const db = mysql.createConnection({
@@ -33,6 +35,28 @@ app.listen(3001, () => {
   console.log("Funcionando en puerto 3001");
 });
 
+
+
+
+app.post("/registro", (req, res) => {
+  const usuario = req.body.usuario;
+  const contrasena = req.body.contrasena;
+  const rol = req.body.rol;
+
+  bcrypt.hash(contrasena, saltRounds, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+
+    db.query(
+      "INSERT INTO users (usuario, contrasena, rol) VALUES (?,?,?)",
+      [usuario, contrasena, rol],
+      (err, result) => {
+        console.log(err);
+      }
+    );
+  });
+});
 
 
 app.get('/datos', (req, res) => {
