@@ -108,6 +108,15 @@ app.post('/crear-empresa', (req,res) =>{
     });
 });
 
+app.get('/empresas', (req,res) =>{
+  db.query("SELECT * FROM empresa", (err, result) => {
+    if (err){
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
 
 app.get('/usuarios', (req, res) => {
   db.query(
