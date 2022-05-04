@@ -2,6 +2,8 @@ const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
 
+const { Connection, Request } = require("tedious");
+
 const multer = require("multer");
 const xlsx = require('xlsx');
 
@@ -9,6 +11,10 @@ const xlsx = require('xlsx');
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.listen(3001, () => {
+    console.log('running on port 3001');
+}); 
 
 app.use(express.urlencoded({ extended: true }));
 var storage = multer.memoryStorage();
@@ -18,21 +24,34 @@ app.get("/", (req, res) => {
 })
 
 
-const db = mysql.createConnection({
-  user: "root",
-  host: "localhost",
-  password: "",
-  database: "financhdb",
+// Create connection to database
+const config = {
+  authentication: {
+    options: {
+      userName: "itcorp", // update me
+      password: "Financhdb1*" // update me
+    },
+    type: "default"
+  },
+  server: "itcorpsv.database.windows.net", // update me
+  options: {
+    database: "Financh", //update me
+    encrypt: true
+  }
+};
+
+const connection = new Connection(config);
+
+// Attempt to connect and execute queries if connection goes through
+connection.on("connect", err => {
+  if (err) {
+    console.error(err.message);
+  } else {
+    console.log("conexion!");
+  }
 });
 
-app.listen(3001, () => {
-  db.connect(function(err){
-      if (err) throw err;
-      console.log("Connected!");
-    });
-  console.log("Funcionando en puerto 3001");
-});
-
+connection.connect();
 
 
 app.get('/datos', (req, res) => {
