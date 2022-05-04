@@ -1,11 +1,12 @@
 const express = require('express');
-const mysql = require('mysql');
 const cors = require('cors');
+const sql = require("mssql");
 
 const { Connection, Request } = require("tedious");
 
 const multer = require("multer");
 const xlsx = require('xlsx');
+const { text } = require('body-parser');
 
 
 const app = express();
@@ -56,17 +57,21 @@ connection.connect();
 
 app.get('/datos', (req, res) => {
 
-  db.query(
-    "SELECT * FROM Usuario",
-    (err, result) => {
-          if (err) {
-              res.send({err:err})
-          }
-          res.send(result);
 
-      }
-  );
+  sql.connect(config, function (err) {
+    if (err) console.log(err);
+  let sqlRequest = new sql.Request();
+  
+  let sqlQuery = 'Select * FROM usuario';
+
+  sqlRequest.query(sqlQuery, function(err, data){
+    if(err) console.log(err)
+    console.log(data);
+    res.send(data.recordsets[0]);
+  });
 });
+});
+
 
 
 app.post('/prueba', (req, res) => {
@@ -91,26 +96,37 @@ app.post('/prueba', (req, res) => {
 app.post('/crear-empresa', (req,res) =>{
   console.log(req.body);
     const Nombre = req.body.Nombre;
+    // console.log(Nombre);
 
-    db.query(
-      "INSERT INTO empresa (Nombre) VALUE (?)",
-    [Nombre], (err, resutl) =>{
-        if(err){
-          console.log(err);
-        } else {
-          res.send("Funcionó");
-        }
+    sql.connect(config, function (err) {
+      if (err) console.log(err);
+    let sqlRequest = new sql.Request();
+    
+    let sqlQuery = "INSERT INTO empresa (Nombre) VALUES ('" + Nombre + "')";
+  
+    sqlRequest.query(sqlQuery, function(err, data){
+      if(err) console.log(err)
+      // console.log(data);
+      // res.send(data);
+
     });
+  });
 });
 
 app.get('/empresas', (req,res) =>{
-  db.query("SELECT * FROM empresa", (err, result) => {
-    if (err){
-      console.log(err);
-    } else {
-      res.send(result);
-    }
+
+  sql.connect(config, function (err) {
+    if (err) console.log(err);
+  let sqlRequest = new sql.Request();
+  
+  let sqlQuery = 'Select * FROM empresa';
+
+  sqlRequest.query(sqlQuery, function(err, data){
+    if(err) console.log(err)
+    console.log(data);
+    res.send(data.recordsets[0]);
   });
+});
 });
 
 app.get('/usuarios', (req, res) => {
