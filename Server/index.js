@@ -96,13 +96,14 @@ app.post('/prueba', (req, res) => {
 app.post('/crear-empresa', (req,res) =>{
   console.log(req.body);
     const Nombre = req.body.Nombre;
+    const Sucursal = req.body.Sucursal;
     // console.log(Nombre);
 
     sql.connect(config, function (err) {
       if (err) console.log(err);
     let sqlRequest = new sql.Request();
     
-    let sqlQuery = "INSERT INTO empresa (Nombre) VALUES ('" + Nombre + "')";
+    let sqlQuery = "INSERT INTO empresa (Nombre, Sucursal) VALUES ('" + Nombre + "',  '" + Sucursal +"')";
   
     sqlRequest.query(sqlQuery, function(err, data){
       if(err) console.log(err)
