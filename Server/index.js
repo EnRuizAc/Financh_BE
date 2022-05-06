@@ -143,6 +143,28 @@ app.get('/usuarios', (req, res) => {
   );
 });
 
+app.post('/Registro', (req,res) =>{
+  console.log(req.body);
+    const Correo = req.body.Correo;
+    const Contrasena = req.body.Contrasena;
+    const Rol = req.body.Rol;
+    // console.log(Nombre);
+
+    sql.connect(config, function (err) {
+      if (err) console.log(err);
+    let sqlRequest = new sql.Request();
+    
+    let sqlQuery = "INSERT INTO usuario (Correo, Contrasena, Rol) VALUES ('" + Correo + "',  '" + Contrasena +"',  '" + Rol +"')";
+  
+    sqlRequest.query(sqlQuery, function(err, data){
+      if(err) console.log(err)
+      // console.log(data);
+      // res.send(data);
+
+    });
+  });
+});
+
 app.get('/datosCuentas', (req, res) => {
 
   db.query(
