@@ -130,18 +130,31 @@ app.get('/empresas', (req,res) =>{
 });
 });
 
-app.get('/usuarios', (req, res) => {
-  db.query(
-    "SELECT * FROM usuario" ,
-    (err, result) => {
-          if (err) {
-              console.log(err);
-          } else {
-            res.send(result);
-          }
+
+app.post('/login', (req,res) =>{
+    const Correo = req.body.Correo;
+    const Contrasena = req.body.Contrasena;
+
+    sql.connect(config, function (err) {
+      if (err) console.log(err);
+    let sqlRequest = new sql.Request();
+    
+    let sqlQuery = "Select * from usuario where Correo = '"+Correo+"' and Contrasena='"+Contrasena+"'";
+  
+    sqlRequest.query(sqlQuery, function(err, data,result){
+      if(err) console.log(err)
+      else{
+        if(data.recordsets[0].length === 1){
+          console.log("bien");
+          res.redirect('http://localhost:3000');
+        } else {
+          console.log("Correo o contraseña incorrecta");
+        }
       }
-  );
+    });
+  });
 });
+
 
 app.post('/Registro', (req,res) =>{
   console.log(req.body);
