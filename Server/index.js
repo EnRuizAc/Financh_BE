@@ -205,6 +205,7 @@ app.get('/datosMovimientos', (req, res) => {
 });
 
 
+
 var upload = multer({
   storage: storage
 });
@@ -228,25 +229,24 @@ function uploadXlsx(req, res) {
   //Se define el tamaño de todo según los contenidos
   const size = data.length;
 
-  // Cuentas tendrá data en formato que pueda ser interpretado para insertar en la base de datos mediante las llaves
+  // Cuentas tendrá data en formato json
   var cuentas = [];
+  // Variable para indice de cuentas
+  var k = 0;
+
+  // sqlCuen tendrá cuentas en formato de arreglo, para inyección individual en cada query
+  var sqlCuen = [];
+  // Variable apra indice de sqlCuen dentro de la inyección a la base de datos
+  var ind = 0;
 
   //Convertir cada línea horizontal en un objeto fijo para poder acceder al valor dado iterando
   for (var i = 0; i < size; i++)
   {
     data[i] = Object.values(data[i]);
   }
-  
-  // console.log("Cuentas");
-  // console.log(cuentas);
-  // console.log("Data");
-  // console.log(data);
 
 
   // Inserción en base de datos. Es necesario solo almacenar las cuentas, no toda la información (encabezado y pie)
-  // Variable para indice de cuentas
-  var k = 0;
-
   //Ciclo para almacenar los valores en cuentas, al mismo tiempo que se insertan en la base de datos
   for (var i = 0; i < size; i++)
   {
@@ -277,29 +277,68 @@ function uploadXlsx(req, res) {
         cuentas[k].Afectable = false;
       }
 
+      // Inserción en sqlCuen para el formato específico y requerido
+      sqlCuen.push([]);
+      sqlCuen[k].push(cuentas[k].Nivel);
+      sqlCuen[k].push(cuentas[k].Codigo);
+      sqlCuen[k].push(cuentas[k].Nombre);
+      sqlCuen[k].push(cuentas[k].Tipo);
+      sqlCuen[k].push(cuentas[k].Afectable);
+      sqlCuen[k].push(4); // ID_Empresa
+      sqlCuen[k].push(4); // ID_Usuario
+
       //Inserción en la base de datos de los respectivos atributos
-      db.query(
-        "INSERT INTO Cuenta (Nivel, Codigo, Nombre, Tipo, Es_Afectable) VALUES (?, ?, ?, ?, ?)", [cuentas[k].Nivel, cuentas[k].Codigo, cuentas[k].Nombre, cuentas[k].Tipo, cuentas[k].Afectable],
-        (err, result) => {
-              if (err) {
-                console.log(err)
-              } 
-              // else {
-              //   res.send(result)
-              // }
-          }
-      );
+      sql.connect(config, function (err) {
+        if (err) console.log(err);
+        let sqlRequest = new sql.Request();
+        // console.log("indice");
+        // console.log(ind);
+        // console.log("k");
+        // console.log(k);
+
+        // Asignación de las variables a insertar en cada query
+        sqlRequest.input('niv', sql.SmallInt, sqlCuen[ind][0]);
+        sqlRequest.input('cod', sql.VarChar, sqlCuen[ind][1]);
+        sqlRequest.input('nom', sql.VarChar, sqlCuen[ind][2]);
+        sqlRequest.input('tip', sql.VarChar, sqlCuen[ind][3]);
+        sqlRequest.input('afe', sql.Bit, sqlCuen[ind][4]);
+        sqlRequest.input('ide', sql.SmallInt, sqlCuen[ind][5]);
+        sqlRequest.input('idu', sql.SmallInt, sqlCuen[ind][6]);
+        // Se inicia con k teniendo valor final, por lo que se necesita un indice para manejo interno en la función
+        ind++;
+
+
+        // console.log("Cuentas completas antes solicitud");
+        // console.log(cuentas);
+        // console.log("Cuentas indice 0");
+        // console.log(cuentas[0]);
+        // console.log("cuentas 0 Nivel");
+        // console.log(cuentas[0].Nivel);
+
+        let sqlQuery = "INSERT INTO Cuenta (Nivel, Codigo, Nombre, Tipo, Es_Afectable, ID_Empresa, ID_Usuario) VALUES (@niv, @cod, @nom, @tip, @afe, @ide, @idu)";
+        // let sqlQuery = "SELECT * FROM Cuenta";
+
+        sqlRequest.query(sqlQuery, function(err, data){
+          if(err) console.log(err)
+          // console.log(sqlCuen);
+          // res.send(data);
+
+        });
+      });
+
       //Aumento del índice que tendra cuentas, debido al desface que existe debido al encabezado
       k++;
+      
   }
 
   //Verificación final de los valores que contiene cuentas después del ciclo
 
   }
-  console.log("Cuentas después ciclo");
-  // console.log(cuentas);
+  console.log("sqlCuentas");
+  console.log(sqlCuen);
+  console.log(sqlCuen.length);
 
-return res.status(201).send(cuentas);
+return res.status(201).send(sqlCuen);
 };
 
 
@@ -311,10 +350,60 @@ function uploadMovimientos(req, res) {
     var account = "";
     var count = 0;
     var movimientos = [];
+    // SQL
+    var sqlMov = [];
+    var ind = 0;
+
+    var sqlCuen = [];
+    var indCuen = 0;
+    var sqlIndCuen = 0;
+
+
     for (let line of data) {
         if (Object.keys(line).length >= 4 && line["CONTPAQ i"] !== undefined && line["__EMPTY"] !== "") {
             if (String(line["CONTPAQ i"]).match(/\d{3}-\d{3}/)) {
                 account = line["CONTPAQ i"];
+                sqlCuen.push([]);
+                sqlCuen[indCuen].push(account);
+                // sqlCuen[indCuen].push(new Date(line["CONTPAQ i"]).toLocaleDateString('en-ZA'));
+                sqlCuen[indCuen].push(new Date("2020-01-01").toLocaleDateString('en-ZA'));
+                sqlCuen[indCuen].push(line["Hoja:      1"]);
+                // console.log(sqlCuen);
+                indCuen++;
+
+                //Update en la base de datos de los respectivos atributos
+                sql.connect(config, function (err) {
+                  if (err) console.log(err);
+                  let sqlRequest = new sql.Request();
+                  // console.log("indice");
+                  // console.log(ind);
+                  // console.log("count");
+                  // console.log(count);
+
+                  // Asignación de las variables a insertar en cada query
+                  sqlRequest.input('cod', sql.VarChar, sqlCuen[sqlIndCuen][0]);
+                  sqlRequest.input('fec', sql.Date, sqlCuen[sqlIndCuen][1]);
+                  sqlRequest.input('sal', sql.Float, sqlCuen[sqlIndCuen][2]);
+
+                  // Se inicia con cont teniendo valor final, por lo que se necesita un indice para manejo interno en la función
+                  // console.log("Prueba");
+                  // console.log(sqlCuen[sqlIndCuen][1]);
+                  // console.log(typeof(sqlMov[sqlIndCuen][1]));
+                  sqlIndCuen++;
+
+
+                  let sqlQuery = 'UPDATE Cuenta SET Fecha = @fec, Saldo = @sal WHERE Codigo = @cod';
+                  // let sqlQuery = "SELECT * FROM Movimiento";
+
+                  sqlRequest.query(sqlQuery, function(err, data){
+                    if(err) console.log(err)
+                    // console.log(sqlMov);
+                    // res.send(data);
+
+                  });
+                });
+
+
             } else {
                 if (Object.keys(line).length >= 6 && line["CONTPAQ i"] !== "Fecha") {
 
@@ -367,20 +456,58 @@ function uploadMovimientos(req, res) {
                     // console.log(typeof(movimientos[count].Fecha))
 
 
+                    // Inserción en sqlMov para el formato específico y requerido
+                    sqlMov.push([]);
+                    sqlMov[count].push(movimientos[count].Fecha);
+                    sqlMov[count].push(movimientos[count].Tipo);
+                    sqlMov[count].push(movimientos[count].Numero);
+                    sqlMov[count].push(movimientos[count].Concepto);
+                    sqlMov[count].push(movimientos[count].Referencia);
+                    sqlMov[count].push(movimientos[count].Cargo);
+                    sqlMov[count].push(movimientos[count].Abono);
+                    sqlMov[count].push(movimientos[count].Saldo);
+                    sqlMov[count].push(1000); // ID_Cuenta
+
                     //Inserción en la base de datos de los respectivos atributos
-                    db.query(
-                      "INSERT INTO Movimiento (Fecha, Tipo, Numero, Concepto, Referencia, Cargo, Abono, Saldo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                       [movimientos[count].Fecha, movimientos[count].Tipo, movimientos[count].Numero, movimientos[count].Concepto, movimientos[count].Referencia,
-                        movimientos[count].Cargo, movimientos[count].Abono, movimientos[count].Saldo],
-                      (err, result) => {
-                            if (err) {
-                              console.log(err)
-                            } 
-                            // else {
-                            //   res.send(result)
-                            // }
-                        }
-                    );
+                    sql.connect(config, function (err) {
+                      if (err) console.log(err);
+                      let sqlRequest = new sql.Request();
+                      // console.log("indice");
+                      // console.log(ind);
+                      // console.log("count");
+                      // console.log(count);
+
+                      // Asignación de las variables a insertar en cada query
+                      sqlRequest.input('fec', sql.Date, sqlMov[ind][0]);
+                      sqlRequest.input('tip', sql.VarChar, sqlMov[ind][1]);
+                      sqlRequest.input('num', sql.Int, sqlMov[ind][2]);
+                      sqlRequest.input('con', sql.VarChar, sqlMov[ind][3]);
+                      sqlRequest.input('ref', sql.VarChar, sqlMov[ind][4]);
+                      sqlRequest.input('car', sql.Float, sqlMov[ind][5]);
+                      sqlRequest.input('abo', sql.Float, sqlMov[ind][6]);
+                      sqlRequest.input('sal', sql.Float, sqlMov[ind][7]);
+                      sqlRequest.input('idc', sql.SmallInt, sqlMov[ind][8]);
+                      // Se inicia con k teniendo valor final, por lo que se necesita un indice para manejo interno en la función
+                      ind++;
+
+
+                      // console.log("Cuentas completas antes solicitud");
+                      // console.log(cuentas);
+                      // console.log("Cuentas indice 0");
+                      // console.log(cuentas[0]);
+                      // console.log("cuentas 0 Nivel");
+                      // console.log(cuentas[0].Nivel);
+
+                      let sqlQuery = "INSERT INTO Movimiento (Fecha, Tipo, Numero, Concepto, Referencia, CArgo, Abono, Saldo, ID_Cuenta) VALUES (@fec, @tip, @num, @con, @ref, @car, @abo, @sal, @idc)";
+                      // let sqlQuery = "SELECT * FROM Movimiento";
+
+                      sqlRequest.query(sqlQuery, function(err, data){
+                        if(err) console.log(err)
+                        // console.log(sqlMov);
+                        // res.send(data);
+
+                      });
+                    });
 
 
 
@@ -391,9 +518,10 @@ function uploadMovimientos(req, res) {
         }
     }
 
-    console.log(movimientos);
+    console.log(sqlMov);
     // console.log(count);
-    console.log(typeof(movimientos[0].Fecha));    
+    // console.log(typeof(movimientos[0].Fecha));
+    console.log(sqlCuen.length);    
 
-    return res.status(201).send(movimientos);
+    return res.status(201).send(sqlCuen);
 }
