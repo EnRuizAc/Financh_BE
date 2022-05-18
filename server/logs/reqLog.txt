@@ -404,3 +404,12 @@
 20220517	16:21:22	3753f799-d983-43b2-82a0-e572f0d01111	OPTIONS	http://localhost:3000	/auth
 20220517	16:21:22	8ade8b8c-45cf-4093-a7e5-25bd9ea46788	POST	http://localhost:3000	/auth
 20220517	16:21:26	f5fde4b7-f9ee-41e4-93e4-55c914ef904a	POST	http://localhost:3000	/auth
+20220517	17:14:37	25358aa5-74c3-4c31-9b0f-6d4f833f7c1d	OPTIONS	http://localhost:3000	/registrarEmpresa
+20220517	17:14:37	2512203d-ee7a-4641-a99f-e607e817a6ea	POST	http://localhost:3000	/registrarEmpresa
+20220517	17:16:05	44012ffd-25d0-4bdd-8f27-5aa6fd20686d	OPTIONS	http://localhost:3000	/registrarEmpresa
+20220517	17:16:05	6e3104bf-234d-4f27-a186-a8cc82b67797	POST	http://localhost:3000	/registrarEmpresa
+20220517	17:21:04	620ee726-aa92-47b9-aea3-901f194de1e0	OPTIONS	http://localhost:3000	/registrarEmpresa
+20220517	17:21:04	1cfaf801-4b18-48f9-a2b5-7a89ee462476	POST	http://localhost:3000	/registrarEmpresa
+20220517	17:21:36	492396f1-48f3-4075-9b57-53bd28f3b4f1	OPTIONS	http://localhost:3000	/registrarEmpresa
+20220517	17:21:36	9cca1dc5-d10a-49e2-a8b9-996e6ba723a5	POST	http://localhost:3000	/registrarEmpresa
+20220517	17:21:36	8de7c745-0c05-4e60-90db-21a8ddb7df43	POST	http://localhost:3000	/registrarEmpresa
