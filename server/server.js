@@ -12,7 +12,7 @@ const credentials = require('./middleware/credentials');
 const sql = require('mssql');
 const { Connection, Request } = require("tedious");
 const config = require('./config/dbConn');
-const PORT = process.env.PORT || 3500;
+const PORT = process.env.PORT || 3001;
 
 
 // custom middleware logger
