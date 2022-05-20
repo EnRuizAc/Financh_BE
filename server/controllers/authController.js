@@ -22,6 +22,7 @@ const handleLogin = async (req, res) => {
     if (match) {
         const roles = foundUser.Role;
         const user = foundUser.User;
+        const id = foundUser.UserId;
 
         // create JWTs
         const accessToken = jwt.sign(
@@ -46,7 +47,7 @@ const handleLogin = async (req, res) => {
         const result = await pool.request().query("UPDATE [User] SET [refreshToken] = '" + refreshToken + "' WHERE [User] = '" + foundUser.User + "'");
 
         res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure:true,  maxAge: 24 * 60 * 60 * 1000 }); //secure: true,
-        res.json({ user, roles, accessToken });
+        res.json({ id,user, roles, accessToken });
 
         console.log(foundUser);
     } else {
