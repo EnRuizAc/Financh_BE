@@ -15,6 +15,8 @@ const config = require('./config/dbConn');
 const PORT = process.env.PORT || 3001;
 
 
+
+
 // custom middleware logger
 app.use(logger);
 
@@ -27,7 +29,7 @@ app.use(cors(corsOptions));
 
 
 // built-in middleware to handle urlencoded form data
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
 // built-in middleware for json 
 app.use(express.json());
@@ -39,13 +41,19 @@ app.use(cookieParser());
 app.use('/', express.static(path.join(__dirname,'/public')));
 
 // Routes
-app.use('/users', require('./routes/api/users'));
+
 app.use('/register', require('./routes/register'));
 app.use('/auth', require('./routes/auth'));
 app.use('/refresh', require('./routes/refresh'));
 app.use('/logout', require('./routes/logout'));
 app.use('/registrarEmpresa', require('./routes/registrarEmpresa'));
+app.use('/adminUsers', require('./routes/adminUsers'));
+app.use('/users', require('./routes/api/users'));
+app.use('/subirCuentas', require('./routes/subirCuentas'));
+app.use('/subirMovimientos', require('./routes/subirMovimientos'));
 
+//app.use(verifyJWT);
+app.use('/companies', require('./routes/api/companies'));
 
 app.all('*', (req, res) => {
     res.status(404);
@@ -73,4 +81,3 @@ connection.on("connect", err => {
 });
 
 connection.connect();
-

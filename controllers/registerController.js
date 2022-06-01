@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const { query } = require('express');
 const sql = require('mssql');
 const config = require('../config/dbConn');
 
@@ -36,5 +37,31 @@ const handleNewUser = async (req, res) => {
     }
 }
 
-module.exports = { handleNewUser };
+const postData = async (userId, companyId) => {
+    console.log(`Empresa id: ${companyId} `);
+    console.log(`Usuario id: ${userId} `);
 
+    
+        const pool = await sql.connect(config);
+        const postUserCompanyRealtion = await pool.request().query("INSERT INTO [usuario_empresa] ([ID_Empresa], [ID_Usuario]) VALUES ('"+ companyId +"' , '"+ userId + "')");
+        
+}
+
+
+
+const handleUserCompanyRelation = async (req, res) => {
+    console.log("Testing User Company Realtion");
+    const {userId, companiesIds} = req.body;
+
+
+        await companiesIds.reduce(async (acc, companyId) => {
+            await acc;
+            const post = await postData(userId[0], companyId);
+    
+        }, Promise.resolve());
+        
+
+
+}
+
+module.exports = { handleNewUser, handleUserCompanyRelation}
