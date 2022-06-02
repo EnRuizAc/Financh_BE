@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const sql = require('mssql');
 const config = require('../config/dbConn');
     
