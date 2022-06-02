@@ -51,6 +51,7 @@ app.use('/adminUsers', require('./routes/adminUsers'));
 app.use('/users', require('./routes/api/users'));
 app.use('/subirCuentas', require('./routes/subirCuentas'));
 app.use('/subirMovimientos', require('./routes/subirMovimientos'));
+app.use('/balanzaComprobacion', require('./routes/balanzaComprobacion'));
 
 //app.use(verifyJWT);
 app.use('/companies', require('./routes/api/companies'));
