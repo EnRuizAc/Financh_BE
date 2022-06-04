@@ -21,7 +21,7 @@ const getAllCompanies = async (req, res) => {
 
       res.json(companiesList);
       console.log(companiesList);
-      
+
 
     } catch (error) {
       console.log(error);
@@ -31,7 +31,7 @@ const getAllCompanies = async (req, res) => {
 
 const getAccessCompanies = async (req, res) => {
   const userId = req.body.id;
-  
+
 
 
 
@@ -43,7 +43,26 @@ const getAccessCompanies = async (req, res) => {
 
       res.json(companiesList);
       console.log(companiesList);
-      
+
+
+    } catch (error) {
+      console.log(error);
+
+    }
+
+}
+
+const getRelationUserCompanyData = async (req, res) => {
+
+
+  try {
+
+      const pool = await sql.connect(config);
+      const companies = await pool.request().query("SELECT U.UserId, E.ID_Empresa, U.[User], E.Nombre FROM Empresa E JOIN Usuario_Empresa UE on E.ID_Empresa = UE.ID_Empresa JOIN [dbo].[User] U on UE.ID_Usuario = U.UserId ");
+
+      res.json(companies);
+      console.log(companies);
+
 
     } catch (error) {
       console.log(error);
@@ -54,6 +73,7 @@ const getAccessCompanies = async (req, res) => {
 
 
 
-module.exports = { getAllCompanies, getAccessCompanies, userId };
-    
 
+
+
+module.exports = { getAllCompanies, getAccessCompanies, userId, getRelationUserCompanyData };

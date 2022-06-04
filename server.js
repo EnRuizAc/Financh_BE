@@ -54,9 +54,11 @@ app.use('/subirMovimientos', require('./routes/subirMovimientos'));
 app.use('/balanzaComprobacion', require('./routes/balanzaComprobacion'));
 app.use('/estadoResultados', require('./routes/estadoResultados'));
 app.use('/balanceGeneral', require('./routes/balanceGeneral'));
+app.use('/adminUsers', require('./routes/adminUsers'));
 
 //app.use(verifyJWT);
 app.use('/companies', require('./routes/api/companies'));
+app.use('/deleteRelation', require('./routes/deleteRelation'));
 
 app.all('*', (req, res) => {
     res.status(404);

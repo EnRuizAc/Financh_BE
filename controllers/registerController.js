@@ -51,17 +51,21 @@ const postData = async (userId, companyId) => {
 
 const handleUserCompanyRelation = async (req, res) => {
     console.log("Testing User Company Realtion");
-    const {userId, companiesIds} = req.body;
+    const {userId, companyId} = req.body;
 
+    console.log(userId, companyId);
 
-        await companiesIds.reduce(async (acc, companyId) => {
-            await acc;
-            const post = await postData(userId[0], companyId);
+    const post = await postData(userId, companyId);
+
+        // await companiesIds.reduce(async (acc, companyId) => {
+        //     await acc;
     
-        }, Promise.resolve());
+        // }, Promise.resolve());
         
 
 
 }
+
+
 
 module.exports = { handleNewUser, handleUserCompanyRelation}

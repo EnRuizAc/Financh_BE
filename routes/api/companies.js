@@ -13,8 +13,11 @@ router.route('/')
 
 router.route('/:accessCompanies')
     .post(companiesController.getAccessCompanies);
-    
-    
-    
+
+router.route('/:relationUserCompanyData')
+    .get(companiesController.getRelationUserCompanyData)
+
+
+
 
 module.exports = router;
