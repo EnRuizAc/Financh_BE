@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { JSONCookie } = require('cookie-parser');
 const sql = require('mssql');
 const config = require('../config/dbConn');
@@ -39,12 +40,12 @@ const getData  = async (req, res) => {
         //Saca el valor de la Utilidad columna Periodo
         listaEgresosP[0].Cargo_Total = Number(listaEgresosP[0].Cargo_Total);
         listaIngresosP[0].Abono_Total = Number(listaIngresosP[0].Abono_Total);
-        auxUtilidadP = listaIngresosP[0].Abono_Total - listaEgresosP[0].Cargo_Total;
+        auxUtilidadP = (listaIngresosP[0].Abono_Total - listaEgresosP[0].Cargo_Total).toFixed(2);
 
         //Saca el valor de la utilidad columna Acomulado
         listaEgresosA[0].Saldo_TotalE = Number(listaEgresosA[0].Saldo_TotalE);
         listaIngresosA[0].Saldo_Totali = Number(listaIngresosA[0].Saldo_Totali);
-        auxUtilidadA = listaIngresosA[0].Saldo_Totali - listaEgresosA[0].Saldo_TotalE;
+        auxUtilidadA = (listaIngresosA[0].Saldo_Totali - listaEgresosA[0].Saldo_TotalE);
         
 
         listaEgresos[0] = Object.assign(listaEgresosP[0], listaIngresosP[0],
@@ -53,25 +54,31 @@ const getData  = async (req, res) => {
            /* for (i in listaEgresos){
         auxPorcentageA = (listaEgresosPorA[i].Saldo_CuentaA / listaIngresos[i].Saldo_Total1) * 100;
     }*/
-    var tamano = listaEgresosPorP.length;
-    var totalP = listaIngresos[0].Abono_Total1;
-    var totalA = listaIngresos[0].Saldo_Total1;
+
+    //Saca el valor de los porcentajes
+        var tamano = listaEgresosPorP.length;
+        var totalP = listaIngresos[0].Abono_Total1;
+        var totalA = listaIngresos[0].Saldo_Total1;
     
-
-
-    for (i = 0; i < tamano; i++)
-    {
-        listaEgresos[i].PorcentajeP = ((listaEgresosPorP[i].Cargo_CuentaP / totalP) * 100).toFixed(2);
-        listaEgresos[i].PorcentajeA = ((listaEgresosPorA[i].Saldo_CuentaA  / totalA) * 100).toFixed(2);
+        for (i = 0; i < tamano; i++)
+        {
+            listaEgresos[i].PorcentajeP = ((listaEgresosPorP[i].Cargo_CuentaP / totalP) * 100).toFixed(2);
+            listaEgresos[i].PorcentajeA = ((listaEgresosPorA[i].Saldo_CuentaA  / totalA) * 100).toFixed(2);
     
-    }
-    for (i = 0; i < 1; i++)
-    {
-    listaEgresos[i].PorcentajePi = ((totalP / totalP) * 100).toFixed(2);
-    listaEgresos[i].PorcentajeAi = ((totalA / totalA) * 100).toFixed(2);
-    }
+        }
+        for (i = 0; i < 1; i++)
+        {
+            listaEgresos[i].PorcentajePi = ((totalP / totalP) * 100).toFixed(2);
+            listaEgresos[i].PorcentajeAi = ((totalA / totalA) * 100).toFixed(2);
+        }
 
-    //listaIngresos
+    
+        // console.log("tamanos");
+        // console.log(tamano);
+        // console.log(tamano2);
+
+
+    
 
         //Guarda el valor de la utilidad
         utilidad = [auxUtilidadP, auxUtilidadA];
@@ -83,14 +90,13 @@ const getData  = async (req, res) => {
         //console.log(auxPorcentageP);
         //console.log(auxPorcentageA);
         console.log(listaEgresos);
-       // console.log(listaEgresosPorP[0].Cargo_CuentaP);
-        //console.log(listaEgresosPorP);
-        //console.log(listaIngresos);
+       
         res.json(listaEgresos);
 
-    } catch (error) {
+    } 
+    
+    catch (error){
        console.log(error);
-
     }
 }
 
