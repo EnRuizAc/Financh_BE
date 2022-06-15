@@ -6,13 +6,31 @@ const getData  = async (req, res) => {
     console.log("Testing ver balanza");
 
     try {
+        const fechaInicio = new String(req.body.fechaI);
+        const fechaFinal = new String(req.body.fechaF);
+        const idEmpresa = req.body.idEmpresa;
+
+        const pool = await sql.connect(config);
+
+        var comp = await pool.request().query("SELECT * FROM [dbo].[cuenta] c WHERE c.ID_Empresa = '" + idEmpresa + "';");
+        const compSize = comp.recordsets[0].length;
+        console.log("compsize");
+        console.log(compSize);
+        if (compSize == 0)
+        {
+            console.log("No hay registros");
+            comp = false;
+            return res.status(500);
+
+        }
+        else {
+            comp = true;
      
         const pool = await sql.connect(config);
-        const cuentas = await pool.request().query("SELECT Codigo, Nombre, Nivel, c.DeudoraInicial, b.AcreedoraInicial, IIF(b.TipoSaldo = 'A', 'A', 'D' ) AS TipoSaldo FROM [dbo].[cuenta] a FULL JOIN( SELECT ID_Cuenta, [Saldo] AS AcreedoraInicial, TipoSaldo = 'A' FROM [dbo].[cuenta]  WHERE [Tipo] LIKE ('B%') OR [Tipo] LIKE ('D%') OR [Tipo] LIKE ('F%') OR [Tipo] LIKE ('H%'))b ON a.ID_Cuenta = b.[ID_Cuenta] FULL JOIN( SELECT ID_Cuenta, [Saldo] AS DeudoraInicial FROM [dbo].[cuenta] WHERE [Tipo] LIKE ('A%') OR [Tipo] LIKE ('G%')) c ON a.ID_Cuenta = c.[ID_Cuenta];");
+        const cuentas = await pool.request().query("SELECT Codigo, Nombre, Nivel, c.DeudoraInicial, b.AcreedoraInicial, IIF(b.TipoSaldo = 'A', 'A', 'D' ) AS TipoSaldo FROM [dbo].[cuenta] a FULL JOIN( SELECT ID_Cuenta, [Saldo] AS AcreedoraInicial, TipoSaldo = 'A' FROM [dbo].[cuenta]  WHERE [Tipo] LIKE ('B%') OR [Tipo] LIKE ('D%') OR [Tipo] LIKE ('F%') OR [Tipo] LIKE ('H%'))b ON a.ID_Cuenta = b.[ID_Cuenta] FULL JOIN( SELECT ID_Cuenta, [Saldo] AS DeudoraInicial FROM [dbo].[cuenta] WHERE [Tipo] LIKE ('A%') OR [Tipo] LIKE ('G%')) c ON a.ID_Cuenta = c.[ID_Cuenta] AND a.ID_Empresa =  '" + idEmpresa + "';");
+        const listaCuentas = cuentas.recordsets[0];
 
-        const listaCuentas = cuentas.recordsets[0]; 
-
-        const mov = await pool.request().query("SELECT g.Cargo_Cuenta, g.Abono_Cuenta FROM [dbo].[cuenta] e LEFT JOIN (SELECT ID_Cuenta, SUM(Cargo) AS Cargo_Cuenta, SUM(Abono) AS Abono_Cuenta FROM [dbo].[movimiento] GROUP BY ID_Cuenta) g ON e.ID_Cuenta = g.ID_Cuenta;");
+        const mov = await pool.request().query("SELECT g.Cargo_Cuenta, g.Abono_Cuenta FROM [dbo].[cuenta] e LEFT JOIN (SELECT ID_Cuenta, SUM(Cargo) AS Cargo_Cuenta, SUM(Abono) AS Abono_Cuenta FROM [dbo].[movimiento] WHERE (Fecha between '" + fechaInicio + "' AND '" + fechaFinal + "') GROUP BY ID_Cuenta) g ON e.ID_Cuenta = g.ID_Cuenta AND e.ID_Empresa =  '" + idEmpresa + "';");
         const listaMovimientos = mov.recordsets[0]; 
         
         const saldoActual = {};
@@ -160,7 +178,8 @@ const getData  = async (req, res) => {
         }
         console.log(listaCuentas);
         
-        res.json(listaCuentas);
+    res.json(listaCuentas);
+    }
 
     } catch (error) {
        console.log(error);
@@ -170,4 +189,3 @@ const getData  = async (req, res) => {
 }
 
 module.exports = getData;
-
