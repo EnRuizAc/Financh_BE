@@ -5,7 +5,8 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     "https://itcorp-front.herokuapp.com",
-    "http://itcorp-front.herokuapp.com"
+    "http://itcorp-front.herokuapp.com",
+    "*"
 ];
 
 module.exports = allowedOrigins;
